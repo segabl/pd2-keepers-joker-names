@@ -14,15 +14,15 @@ if not JokerNames then
   JokerNames.mod_path = ModPath
   JokerNames.save_path = SavePath
   JokerNames.name_styles = {
-    "<N>",
-    "<N> (<K>)"
+    "%N",
+    "%N (%K)"
   }
   JokerNames.localized_name_styles = {}
   JokerNames.settings = {
     use_custom_names = false,
     force_names = 1,
     name_style = 1,
-    custom_name_style = "<N>"
+    custom_name_style = "%N"
   }
   JokerNames.original_joker_names = {}
   JokerNames.original_joker_name_is_empty = {}
@@ -32,7 +32,7 @@ if not JokerNames then
       return name
     end
     local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.settings.custom_name_style
-    return style:gsub("<N>", name):gsub("<K>", original_name)
+    return style:gsub("%%N", name):gsub("%%K", original_name)
   end
   
   function JokerNames:save()
