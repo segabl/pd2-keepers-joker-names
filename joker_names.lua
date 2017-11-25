@@ -220,7 +220,7 @@ if RequiredScript == "lib/managers/menumanager" then
       title = "JokerNames_menu_use_custom_names",
       desc = "JokerNames_menu_use_custom_names_desc",
       callback = "JokerNames_custom_names",
-      value = KillFeed.settings.use_custom_names,
+      value = JokerNames.settings.use_custom_names,
       menu_id = menu_id_main,
       priority = 99
     })
