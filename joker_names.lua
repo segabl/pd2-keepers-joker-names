@@ -13,10 +13,26 @@ if not JokerNames then
   _G.JokerNames = {}
   JokerNames.mod_path = ModPath
   JokerNames.save_path = SavePath
+  JokerNames.name_styles = {
+    "N",
+    "N, K",
+    "N (K)"
+  }
+  JokerNames.localized_name_styles = {}
   JokerNames.settings = {
     use_custom_names = false,
-    force_names = 1
+    force_names = 1,
+    name_style = 1
   }
+  JokerNames.original_joker_names = {}
+  
+  function JokerNames:create_name(name, original_name, style)
+    if not original_name then
+      return name
+    end
+    local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.name_styles[1]
+    return style:gsub("N", name):gsub("K", original_name)
+  end
   
   function JokerNames:save()
     local file = io.open(self.save_path .. "joker_names.txt", "w+")
@@ -70,6 +86,17 @@ if not JokerNames then
     return created
   end
   
+  function JokerNames:create_localized_name_styles(loc_manager)
+    local tbl = {}
+    self.localized_name_styles = {}
+    for i, _ in ipairs(self.name_styles) do
+      local key = "JokerNames_menu_name_style_" .. i
+      table.insert(self.localized_name_styles, key)
+      tbl[key] = self:create_name(loc_manager:text("JokerNames_menu_name_style_name"), loc_manager:text("JokerNames_menu_name_style_keepers_name"), i)
+    end
+    loc_manager:add_localized_strings(tbl)
+  end
+  
   JokerNames:load()
 
 end
@@ -85,11 +112,15 @@ if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
     if Keepers then
       local player_unit = peer_unit or managers.player:player_unit()
       local is_local = player_unit == managers.player:player_unit()
-      local joker_name = Keepers.joker_names[player_unit:network():peer():id()]
-      local is_empty_name = joker_name == "My Joker" or joker_name == ""
+      local peer_id = player_unit:network():peer():id()
+      local is_empty_name = Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
+      JokerNames.original_joker_names[peer_id] = JokerNames.original_joker_names[peer_id] or Keepers:GetJokerNameByPeer(peer_id)
+      
       if player_unit and (is_local or JokerNames.settings.force_names == 2 and is_empty_name or JokerNames.settings.force_names == 3) then
+        
         local new_name = table.random(unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
-        Keepers.joker_names[player_unit:network():peer():id()] = new_name
+        Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, JokerNames.original_joker_names[peer_id])
+        
         if is_local and Keepers.settings.send_my_joker_name then
           for peer_id, peer in pairs(managers.network:session():peers()) do
             if Keepers:IsModdedClient(peer_id) and peer:unit() ~= player_unit then
@@ -97,6 +128,7 @@ if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
             end
           end
         end
+        
       end
     end
     return convert_hostage_to_criminal_original(self, unit, peer_unit)
@@ -116,6 +148,7 @@ if RequiredScript == "lib/managers/menumanager" then
         break
       end
     end
+    JokerNames:create_localized_name_styles(loc)
   end)
 
   local menu_id_main = "JokerNamesMenu"
@@ -158,6 +191,17 @@ if RequiredScript == "lib/managers/menumanager" then
     })
     
     MenuHelper:AddMultipleChoice({
+      id = "name_style",
+      title = "JokerNames_menu_name_style",
+      desc = "JokerNames_menu_name_style_desc",
+      callback = "JokerNames_value",
+      value = JokerNames.settings.name_style,
+      items = JokerNames.localized_name_styles,
+      menu_id = menu_id_main,
+      priority = 98
+    })
+    
+    MenuHelper:AddMultipleChoice({
       id = "force_names",
       title = "JokerNames_menu_force_names",
       desc = "JokerNames_menu_force_names_desc",
@@ -165,7 +209,7 @@ if RequiredScript == "lib/managers/menumanager" then
       value = JokerNames.settings.force_names,
       items = { "JokerNames_menu_force_names_never", "JokerNames_menu_force_names_empty", "JokerNames_menu_force_names_always" },
       menu_id = menu_id_main,
-      priority = 98
+      priority = 97
     })
     
   end)
