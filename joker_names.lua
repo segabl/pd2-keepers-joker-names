@@ -15,7 +15,8 @@ if not JokerNames then
   JokerNames.save_path = SavePath
   JokerNames.name_styles = {
     "%N",
-    "%N (%K)"
+    "%N (%K)",
+    "%N (%T)"
   }
   JokerNames.localized_name_styles = {}
   JokerNames.settings = {
@@ -24,15 +25,13 @@ if not JokerNames then
     name_style = 1,
     custom_name_style = "%N"
   }
-  JokerNames.original_joker_names = {}
-  JokerNames.original_joker_name_is_empty = {}
   
-  function JokerNames:create_name(name, original_name, style)
+  function JokerNames:create_name(name, original_name, unit_type, style)
     if not original_name then
       return name
     end
     local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.settings.custom_name_style
-    return style:gsub("%%N", name):gsub("%%K", original_name)
+    return style:gsub("%%N", name):gsub("%%K", original_name):gsub("%%T", unit_type)
   end
   
   function JokerNames:save()
@@ -93,10 +92,28 @@ if not JokerNames then
     for i, _ in ipairs(self.name_styles) do
       local key = "JokerNames_menu_name_style_" .. i
       table.insert(self.localized_name_styles, key)
-      tbl[key] = self:create_name(loc_manager:text("JokerNames_menu_name_style_name"), loc_manager:text("JokerNames_menu_name_style_keepers_name"), i)
+      tbl[key] = self:create_name(loc_manager:text("JokerNames_menu_name_style_name"), loc_manager:text("JokerNames_menu_name_style_keepers_name"), loc_manager:text("JokerNames_menu_name_style_keepers_type"), i)
     end
     loc_manager:add_localized_strings(tbl)
     table.insert(self.localized_name_styles, "JokerNames_menu_name_style_custom")
+  end
+  
+  function JokerNames:set_joker_name(peer_id, unit)
+    local tweak = unit:base()._stats_name or unit:base()._tweak_table
+    local new_name = table.random(tweak:find("female") and self.names.female or self.names.male)
+    local original_name = Keepers.settings.my_joker_name
+    local unit_type = KillFeed and KillFeed:get_name_by_tweak_data_id(tweak) or tweak:pretty(true):gsub("Swat", "SWAT"):gsub("Fbi", "FBI")
+    Keepers.joker_names[peer_id] = self:create_name(new_name, original_name, unit_type)
+  end
+  
+  function JokerNames:check_peer_name_override(peer_id, unit)
+    if JokerNames.settings.force_names < 2 then
+      return
+    end
+    local empty_name = Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
+    if empty_name or self.settings.force_names == 3 then
+      self:set_joker_name(peer_id, unit)
+    end
   end
   
   JokerNames:load()
@@ -106,7 +123,7 @@ end
 
 if RequiredScript == "lib/units/interactions/interactionext" then
 
-  -- Handle local player joker
+  -- Handle joker name setting
   local interact_original = IntimitateInteractionExt.interact
   function IntimitateInteractionExt:interact(player, ...)
   
@@ -114,15 +131,10 @@ if RequiredScript == "lib/units/interactions/interactionext" then
     
       local peer_id = player:network():peer():id()
       
-      local new_name = table.random(self._unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
-      Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, Keepers.settings.my_joker_name)
+      JokerNames:set_joker_name(peer_id, self._unit)
       
       if Keepers.settings.send_my_joker_name then
-        for peer_id, peer in pairs(managers.network:session():peers()) do
-          if Keepers:IsModdedClient(peer_id) and peer:unit() ~= player then
-            LuaNetworking:SendToPeer(peer_id, "Keepers!", new_name)
-          end
-        end
+        LuaNetworking:SendToPeers("Keepers!", Keepers.joker_names[peer_id])
       end
       
     end
@@ -130,29 +142,32 @@ if RequiredScript == "lib/units/interactions/interactionext" then
     return interact_original(self, player, ...)
   end
   
-  -- Handle other players jokers
+  -- Handle name overrides (as host)
   local sync_interacted_original = IntimitateInteractionExt.sync_interacted
   function IntimitateInteractionExt:sync_interacted(peer, player, status, ...)
   
     local player_unit = player or peer and peer:unit()
-    if player_unit and self.tweak_data == "hostage_convert" and status == "complete" and JokerNames.settings.force_names > 1 then
-      
-      local peer_id = player_unit:network():peer():id()
-      
-      -- Backup original Joker names for name style options
-      JokerNames.original_joker_names[peer_id] = JokerNames.original_joker_names[peer_id] or Keepers:GetJokerNameByPeer(peer_id)
-      JokerNames.original_joker_name_is_empty[peer_id] = JokerNames.original_joker_name_is_empty[peer_id] or Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
-      
-      if JokerNames.original_joker_name_is_empty[peer_id] or JokerNames.settings.force_names == 2 then
-      
-        local new_name = table.random(self._unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
-        Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, JokerNames.original_joker_names[peer_id])
-      
-      end
-    
+    if player_unit and self.tweak_data == "hostage_convert" then
+      JokerNames:check_peer_name_override(player_unit:network():peer():id(), self._unit)
     end
   
     return sync_interacted_original(self, peer, player, status, ...)
+  end
+
+end
+
+
+if RequiredScript == "lib/network/handlers/unitnetworkhandler" then
+
+  -- Handle name overrides (as client)
+  local mark_minion_original = UnitNetworkHandler.mark_minion
+  function UnitNetworkHandler:mark_minion(unit, minion_owner_peer_id, ...)
+  
+    if minion_owner_peer_id ~= managers.network:session():local_peer():id() then
+      JokerNames:check_peer_name_override(minion_owner_peer_id, unit)
+    end
+    
+    return mark_minion_original(self, unit, minion_owner_peer_id, ...)
   end
 
 end

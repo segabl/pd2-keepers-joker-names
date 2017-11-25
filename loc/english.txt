@@ -9,9 +9,10 @@
   "JokerNames_menu_name_style_desc" : "Format of the the Joker names"
   "JokerNames_menu_name_style_name" : "Name",
   "JokerNames_menu_name_style_keepers_name" : "Keepers Name",
+  "JokerNames_menu_name_style_keepers_type" : "Type",
   "JokerNames_menu_name_style_custom" : "Custom",
   "JokerNames_menu_custom_name_style" : "Custom name format",
-  "JokerNames_menu_custom_name_style_desc" : "Create your own name format\n%N = Name, %K = Keepers name",
+  "JokerNames_menu_custom_name_style_desc" : "Create your own name format\n%N = Name, %K = Keepers name, %T = Unit type",
   "JokerNames_menu_force_names" : "Override names",
   "JokerNames_menu_force_names_desc" : "Override other peoples joker names depending on settings",
   "JokerNames_menu_force_names_never" : "Never",
