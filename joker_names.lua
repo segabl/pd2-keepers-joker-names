@@ -14,24 +14,25 @@ if not JokerNames then
   JokerNames.mod_path = ModPath
   JokerNames.save_path = SavePath
   JokerNames.name_styles = {
-    "N",
-    "N, K",
-    "N (K)"
+    "<N>",
+    "<N> (<K>)"
   }
   JokerNames.localized_name_styles = {}
   JokerNames.settings = {
     use_custom_names = false,
     force_names = 1,
-    name_style = 1
+    name_style = 1,
+    custom_name_style = "<N>"
   }
   JokerNames.original_joker_names = {}
+  JokerNames.original_joker_name_is_empty = {}
   
   function JokerNames:create_name(name, original_name, style)
     if not original_name then
       return name
     end
-    local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.name_styles[1]
-    return style:gsub("N", name):gsub("K", original_name)
+    local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.settings.custom_name_style
+    return style:gsub("<N>", name):gsub("<K>", original_name)
   end
   
   function JokerNames:save()
@@ -95,6 +96,7 @@ if not JokerNames then
       tbl[key] = self:create_name(loc_manager:text("JokerNames_menu_name_style_name"), loc_manager:text("JokerNames_menu_name_style_keepers_name"), i)
     end
     loc_manager:add_localized_strings(tbl)
+    table.insert(self.localized_name_styles, "JokerNames_menu_name_style_custom")
   end
   
   JokerNames:load()
@@ -102,36 +104,55 @@ if not JokerNames then
 end
 
 
-if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
+if RequiredScript == "lib/units/interactions/interactionext" then
 
-  local convert_hostage_to_criminal_original = GroupAIStateBase.convert_hostage_to_criminal
-  function GroupAIStateBase:convert_hostage_to_criminal(unit, peer_unit)
-    if not alive(unit) then
-      return
-    end
-    if Keepers then
-      local player_unit = peer_unit or managers.player:player_unit()
-      local is_local = player_unit == managers.player:player_unit()
-      local peer_id = player_unit:network():peer():id()
-      local is_empty_name = Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
-      JokerNames.original_joker_names[peer_id] = JokerNames.original_joker_names[peer_id] or Keepers:GetJokerNameByPeer(peer_id)
+  -- Handle local player joker
+  local interact_original = IntimitateInteractionExt.interact
+  function IntimitateInteractionExt:interact(player, ...)
+  
+    if self.tweak_data == "hostage_convert" and self:can_interact(player) then
+    
+      local peer_id = player:network():peer():id()
       
-      if player_unit and (is_local or JokerNames.settings.force_names == 2 and is_empty_name or JokerNames.settings.force_names == 3) then
-        
-        local new_name = table.random(unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
-        Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, JokerNames.original_joker_names[peer_id])
-        
-        if is_local and Keepers.settings.send_my_joker_name then
-          for peer_id, peer in pairs(managers.network:session():peers()) do
-            if Keepers:IsModdedClient(peer_id) and peer:unit() ~= player_unit then
-              LuaNetworking:SendToPeer(peer_id, "Keepers!", new_name)
-            end
+      local new_name = table.random(self._unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
+      Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, Keepers.settings.my_joker_name)
+      
+      if Keepers.settings.send_my_joker_name then
+        for peer_id, peer in pairs(managers.network:session():peers()) do
+          if Keepers:IsModdedClient(peer_id) and peer:unit() ~= player then
+            LuaNetworking:SendToPeer(peer_id, "Keepers!", new_name)
           end
         end
-        
       end
+      
     end
-    return convert_hostage_to_criminal_original(self, unit, peer_unit)
+
+    return interact_original(self, player, ...)
+  end
+  
+  -- Handle other players jokers
+  local sync_interacted_original = IntimitateInteractionExt.sync_interacted
+  function IntimitateInteractionExt:sync_interacted(peer, player, status, ...)
+  
+    local player_unit = player or peer and peer:unit()
+    if player_unit and self.tweak_data == "hostage_convert" and status == "complete" and JokerNames.settings.force_names > 1 then
+      
+      local peer_id = player_unit:network():peer():id()
+      
+      -- Backup original Joker names for name style options
+      JokerNames.original_joker_names[peer_id] = JokerNames.original_joker_names[peer_id] or Keepers:GetJokerNameByPeer(peer_id)
+      JokerNames.original_joker_name_is_empty[peer_id] = JokerNames.original_joker_name_is_empty[peer_id] or Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
+      
+      if JokerNames.original_joker_name_is_empty[peer_id] or JokerNames.settings.force_names == 2 then
+      
+        local new_name = table.random(self._unit:base()._tweak_table:find("female") and JokerNames.names.female or JokerNames.names.male)
+        Keepers.joker_names[peer_id] = JokerNames:create_name(new_name, JokerNames.original_joker_names[peer_id])
+      
+      end
+    
+    end
+  
+    return sync_interacted_original(self, peer, player, status, ...)
   end
 
 end
@@ -155,6 +176,15 @@ if RequiredScript == "lib/managers/menumanager" then
   Hooks:Add("MenuManagerSetupCustomMenus", "MenuManagerSetupCustomMenusJokerNames", function(menu_manager, nodes)
     MenuHelper:NewMenu(menu_id_main)
   end)
+  
+  local function check_custom_name_style()
+    for _, item in pairs(MenuHelper:GetMenu(menu_id_main)._items_list) do
+      if item:name() == "custom_name_style" then
+        item:set_enabled(JokerNames.settings.name_style > #JokerNames.name_styles)
+        break
+      end
+    end
+  end
 
   Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenusJokerNames", function(menu_manager, nodes)
     
@@ -179,6 +209,11 @@ if RequiredScript == "lib/managers/menumanager" then
       end
       JokerNames:load_names()
     end
+    
+    MenuCallbackHandler.JokerNames_name_style = function(self, item)
+      MenuCallbackHandler.JokerNames_value(self, item)
+      check_custom_name_style()
+    end
 
     MenuHelper:AddToggle({
       id = "use_custom_names",
@@ -194,11 +229,22 @@ if RequiredScript == "lib/managers/menumanager" then
       id = "name_style",
       title = "JokerNames_menu_name_style",
       desc = "JokerNames_menu_name_style_desc",
-      callback = "JokerNames_value",
+      callback = "JokerNames_name_style",
       value = JokerNames.settings.name_style,
       items = JokerNames.localized_name_styles,
       menu_id = menu_id_main,
       priority = 98
+    })
+    
+    MenuHelper:AddInput({
+      id = "custom_name_style",
+      title = "JokerNames_menu_custom_name_style",
+      desc = "JokerNames_menu_custom_name_style_desc",
+      callback = "JokerNames_value",
+      value = JokerNames.settings.custom_name_style,
+      menu_id = menu_id_main,
+      disabled = JokerNames.settings.name_style <= #JokerNames.name_styles,
+      priority = 97
     })
     
     MenuHelper:AddMultipleChoice({
@@ -209,7 +255,7 @@ if RequiredScript == "lib/managers/menumanager" then
       value = JokerNames.settings.force_names,
       items = { "JokerNames_menu_force_names_never", "JokerNames_menu_force_names_empty", "JokerNames_menu_force_names_always" },
       menu_id = menu_id_main,
-      priority = 97
+      priority = 96
     })
     
   end)
@@ -217,6 +263,7 @@ if RequiredScript == "lib/managers/menumanager" then
   Hooks:Add("MenuManagerBuildCustomMenus", "MenuManagerBuildCustomMenusPlayerJokerNames", function(menu_manager, nodes)
     nodes[menu_id_main] = MenuHelper:BuildMenu(menu_id_main)
     MenuHelper:AddMenuItem(nodes["blt_options"], menu_id_main, "JokerNames_menu_main_name", "JokerNames_menu_main_desc")
+    check_custom_name_style()
   end)
   
 end

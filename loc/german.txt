@@ -9,9 +9,12 @@
   "JokerNames_menu_name_style_desc" : "Format der Joker Namen"
   "JokerNames_menu_name_style_name" : "Name",
   "JokerNames_menu_name_style_keepers_name" : "Keepers Name",
+  "JokerNames_menu_name_style_custom" : "Benutzerdefiniert",
+  "JokerNames_menu_custom_name_style" : "Benutzerdefiniertes format",
+  "JokerNames_menu_custom_name_style_desc" : "Erstelle ein eigenes Namenformat\n<N> = Name, <K> = Keepers name",
   "JokerNames_menu_force_names" : "Namen überschreiben",
   "JokerNames_menu_force_names_desc" : "Überschreibe die Joker Namen von anderen Spielern abhängig von den Einstellungen",
   "JokerNames_menu_force_names_never" : "Nie",
-  "JokerNames_menu_force_names_empty" : "Wenn kein eigener Name",
+  "JokerNames_menu_force_names_empty" : "Wenn undefiniert",
   "JokerNames_menu_force_names_always" : "Immer"
 }

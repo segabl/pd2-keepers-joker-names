@@ -9,7 +9,7 @@
   "updates" : [ { "identifier" : "joker_names" } ],
   "dependencies" : [ "KPR" ],
   "hooks" : [
-    { "hook_id" : "lib/managers/group_ai_states/groupaistatebase", "script_path" : "joker_names.lua" }
-    { "hook_id" : "lib/managers/menumanager", "script_path" : "joker_names.lua" }
+    { "hook_id" : "lib/managers/menumanager", "script_path" : "joker_names.lua" },
+    { "hook_id" : "lib/units/interactions/interactionext", "script_path" : "joker_names.lua" }
   ]
 }
