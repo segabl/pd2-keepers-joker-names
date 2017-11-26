@@ -6,7 +6,7 @@
   "JokerNames_menu_information" : "Information",
   "JokerNames_menu_information_text" : "A file named \"custom_joker_names.txt\" with example entries has been created in \"PAYDAY 2/mods/saves\".\nEdit it to add custom names.",
   "JokerNames_menu_name_style" : "Name format",
-  "JokerNames_menu_name_style_desc" : "Format of the the Joker names"
+  "JokerNames_menu_name_style_desc" : "Format of the Joker names"
   "JokerNames_menu_name_style_name" : "Name",
   "JokerNames_menu_name_style_keepers_name" : "Keepers Name",
   "JokerNames_menu_name_style_keepers_type" : "Type",
