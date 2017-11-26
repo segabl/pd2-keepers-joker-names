@@ -18,6 +18,7 @@ if not JokerNames then
     "%N (%K)",
     "%N (%T)"
   }
+  JokerNames.original_name_empty = {}
   JokerNames.localized_name_styles = {}
   JokerNames.settings = {
     use_custom_names = false,
@@ -78,8 +79,6 @@ if not JokerNames then
         male = { table.random(JokerNames.names.male), table.random(JokerNames.names.male) },
         female = { table.random(JokerNames.names.female), table.random(JokerNames.names.female) }
       }))
-      local title = managers.localization:to_upper_text("JokerNames_menu_information")
-      local message = managers.localization:text("JokerNames_menu_information_text")
       created = true
     end
     file:close()
@@ -110,8 +109,10 @@ if not JokerNames then
     if JokerNames.settings.force_names < 2 then
       return
     end
-    local empty_name = Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
-    if empty_name or self.settings.force_names == 3 then
+    if JokerNames.original_name_empty[peer_id] == nil then
+      JokerNames.original_name_empty[peer_id] = Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
+    end
+    if JokerNames.original_name_empty[peer_id] or self.settings.force_names == 3 then
       self:set_joker_name(peer_id, unit)
     end
   end
