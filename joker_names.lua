@@ -101,7 +101,7 @@ if not JokerNames then
     local tweak = unit:base()._stats_name or unit:base()._tweak_table
     local new_name = table.random(tweak:find("female") and self.names.female or self.names.male)
     local original_name = Keepers.settings.my_joker_name
-    local unit_type = KillFeed and KillFeed:get_name_by_tweak_data_id(tweak) or tweak:pretty(true):gsub("Swat", "SWAT"):gsub("Fbi", "FBI")
+    local unit_type = HopLib.name_provider:name_by_id(tweak)
     Keepers.joker_names[peer_id] = self:create_name(new_name, original_name, unit_type)
   end
   
