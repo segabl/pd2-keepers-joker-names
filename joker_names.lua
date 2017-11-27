@@ -1,3 +1,7 @@
+if not HopLib then
+  return
+end
+
 local function parsefile(fname)
   local file = io.open(fname, "r")
   local data = {}
