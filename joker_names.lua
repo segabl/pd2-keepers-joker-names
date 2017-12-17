@@ -151,9 +151,8 @@ if RequiredScript == "lib/units/interactions/interactionext" then
   local sync_interacted_original = IntimitateInteractionExt.sync_interacted
   function IntimitateInteractionExt:sync_interacted(peer, player, status, ...)
   
-    local player_unit = player or peer and peer:unit()
-    if player_unit and self.tweak_data == "hostage_convert" then
-      JokerNames:check_peer_name_override(player_unit:network():peer():id(), self._unit)
+    if self.tweak_data == "hostage_convert" then
+      JokerNames:check_peer_name_override(peer and peer:id() or managers.network:session():local_peer():id(), self._unit)
     end
   
     return sync_interacted_original(self, peer, player, status, ...)
