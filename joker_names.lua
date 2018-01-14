@@ -125,6 +125,22 @@ if not JokerNames then
 
 end
 
+if not JokerNames.keepers_hooked then
+  for k, v in pairs(Hooks._registered_hooks["NetworkReceivedData"]) do
+    if v.id == "NetworkReceivedData_KPR" then
+      local orig = v.func
+      v.func = function(sender, message, data)
+        orig(sender, message, data)
+        if message == "Keepers!" and data and Keepers.settings.show_other_jokers_names and data ~= "" then
+          Keepers.joker_names[sender] = data
+        end
+      end
+      JokerNames.keepers_hooked = true
+      log("[JokerNames] Hooked into Keepers' NetworkReceivedData!")
+      break
+    end
+  end
+end
 
 if RequiredScript == "lib/units/interactions/interactionext" then
 
