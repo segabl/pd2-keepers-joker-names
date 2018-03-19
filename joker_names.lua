@@ -196,6 +196,7 @@ end
 if RequiredScript == "lib/managers/menumanager" then
 
   Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitJokerNames", function(loc)
+	loc:load_localization_file(JokerNames.mod_path .. "loc/english.txt")
 	local custom_language
 	for _, mod in pairs(BLT and BLT.Mods:Mods() or {}) do
 		if mod:GetName() == "PAYDAY 2 THAI LANGUAGE Mod" and mod:IsEnabled() then
@@ -214,7 +215,7 @@ if RequiredScript == "lib/managers/menumanager" then
 			end
 		end
 	end
-	loc:load_localization_file(JokerNames.mod_path .. "loc/english.txt", false)
+	
     JokerNames:create_localized_name_styles(loc)
   end)
 
