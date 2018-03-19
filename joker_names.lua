@@ -196,14 +196,25 @@ end
 if RequiredScript == "lib/managers/menumanager" then
 
   Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitJokerNames", function(loc)
-    loc:load_localization_file(JokerNames.mod_path .. "loc/english.txt")
-    for _, filename in pairs(file.GetFiles(JokerNames.mod_path .. "loc/") or {}) do
-      local str = filename:match("^(.*).txt$")
-      if str and Idstring(str) and Idstring(str):key() == SystemInfo:language():key() then
-        loc:load_localization_file(JokerNames.mod_path .. "loc/" .. filename)
-        break
-      end
-    end
+	local custom_language
+	for _, mod in pairs(BLT and BLT.Mods:Mods() or {}) do
+		if mod:GetName() == "PAYDAY 2 THAI LANGUAGE Mod" and mod:IsEnabled() then
+			custom_language = "thai"
+			break
+		end			
+	end
+	if custom_language then
+		loc:load_localization_file(JokerNames.mod_path .. "loc/" .. custom_language ..".txt")
+    else
+		for _, filename in pairs(file.GetFiles(JokerNames.mod_path .. "loc/") or {}) do
+			local str = filename:match("^(.*).txt$")
+			if str and Idstring(str) and Idstring(str):key() == SystemInfo:language():key() then
+				loc:load_localization_file(JokerNames.mod_path .. "loc/" .. filename)
+				break
+			end
+		end
+	end
+	loc:load_localization_file(JokerNames.mod_path .. "loc/english.txt", false)
     JokerNames:create_localized_name_styles(loc)
   end)
 
