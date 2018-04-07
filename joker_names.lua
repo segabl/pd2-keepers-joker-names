@@ -102,10 +102,10 @@ if not JokerNames then
   end
   
   function JokerNames:set_joker_name(peer_id, unit)
-    local tweak = unit:base()._stats_name or unit:base()._tweak_table
+    local tweak = unit:base()._tweak_table
     local new_name = table.random(tweak:find("female") and self.names.female or self.names.male)
     local original_name = Keepers.settings.my_joker_name
-    local unit_type = HopLib:name_provider():name_by_id(tweak)
+    local unit_type = HopLib:name_provider():name_by_unit(unit) or HopLib:name_provider():name_by_id(tweak)
     Keepers.joker_names[peer_id] = self:create_name(new_name, original_name, unit_type)
   end
   
