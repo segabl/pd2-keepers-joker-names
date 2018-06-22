@@ -102,6 +102,9 @@ if not JokerNames then
   end
   
   function JokerNames:set_joker_name(peer_id, unit)
+    if not alive(unit) then
+      return
+    end
     local tweak = unit:base()._tweak_table
     local new_name = table.random(tweak:find("female") and self.names.female or self.names.male)
     local original_name = Keepers.settings.my_joker_name
