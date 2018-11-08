@@ -105,11 +105,10 @@ if not JokerNames then
     if not alive(unit) then
       return
     end
-    local tweak = unit:base()._tweak_table
-    local new_name = table.random(tweak:find("female") and self.names.female or self.names.male)
+    local info = HopLib:unit_info_manager():get_info(unit, nil, true)
+    local new_name = table.random(info:is_female() and self.names.female or self.names.male)
     local original_name = Keepers.settings.my_joker_name
-    local unit_type = HopLib:name_provider():name_by_unit(unit) or HopLib:name_provider():name_by_id(tweak)
-    Keepers.joker_names[peer_id] = self:create_name(new_name, original_name, unit_type)
+    Keepers.joker_names[peer_id] = self:create_name(new_name, Keepers.settings.my_joker_name, info:name())
   end
   
   function JokerNames:check_peer_name_override(peer_id, unit)
