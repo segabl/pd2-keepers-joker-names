@@ -17,26 +17,18 @@ if not JokerNames then
   _G.JokerNames = {}
   JokerNames.mod_path = ModPath
   JokerNames.save_path = SavePath
-  JokerNames.name_styles = {
-    "%N",
-    "%N (%K)",
-    "%N (%T)"
-  }
   JokerNames.original_name_empty = {}
-  JokerNames.localized_name_styles = {}
   JokerNames.settings = {
     use_custom_names = false,
     force_names = 1,
-    name_style = 1,
     custom_name_style = "%N"
   }
   
-  function JokerNames:create_name(name, original_name, unit_type, style)
-    if not original_name then
-      return name
-    end
-    local style = self.name_styles[style] or self.name_styles[self.settings.name_style] or self.settings.custom_name_style
-    return style:gsub("%%N", name):gsub("%%K", original_name):gsub("%%T", unit_type)
+  function JokerNames:create_name(info)
+    local name_style = self.settings.custom_name_style
+    local name_table = info:is_female() and self.names.female or self.names.male
+    local original_name = Keepers.settings.my_joker_name or ""
+    return name_style:gsub("%%N", function (a) return table.random(name_table) end):gsub("%%S", function (a) return table.random(self.names.surnames) end):gsub("%%K", original_name):gsub("%%T", info:name())
   end
   
   function JokerNames:save()
@@ -62,14 +54,15 @@ if not JokerNames then
   function JokerNames:load_names()
     if self.settings.use_custom_names then
       self.names = parsefile(self.save_path .. "custom_joker_names.txt")
-      if not self.names.male or not self.names.female or #self.names.male == 0 or self.names.female == 0 then
+      if not self.names.male or not self.names.female or not self.names.surnames or #self.names.male == 0 or #self.names.female == 0 or #self.names.surnames == 0 then
         self.names = nil
       end
     end
     if not self.settings.use_custom_names or not self.names then
       self.names = {
         male = parsefile(self.mod_path .. "data/names_m.json"),
-        female = parsefile(self.mod_path .. "data/names_f.json")
+        female = parsefile(self.mod_path .. "data/names_f.json"),
+        surnames = parsefile(self.mod_path .. "data/surnames.json")
       }
     end
   end
@@ -81,7 +74,8 @@ if not JokerNames then
       file = io.open(JokerNames.save_path .. "custom_joker_names.txt", "w+")
       file:write(json.encode({
         male = { table.random(JokerNames.names.male), table.random(JokerNames.names.male) },
-        female = { table.random(JokerNames.names.female), table.random(JokerNames.names.female) }
+        female = { table.random(JokerNames.names.female), table.random(JokerNames.names.female) },
+        surnames = { table.random(JokerNames.names.surnames), table.random(JokerNames.names.surnames) }
       }))
       created = true
     end
@@ -89,26 +83,12 @@ if not JokerNames then
     return created
   end
   
-  function JokerNames:create_localized_name_styles(loc_manager)
-    local tbl = {}
-    self.localized_name_styles = {}
-    for i, _ in ipairs(self.name_styles) do
-      local key = "JokerNames_menu_name_style_" .. i
-      table.insert(self.localized_name_styles, key)
-      tbl[key] = self:create_name(loc_manager:text("JokerNames_menu_name_style_name"), loc_manager:text("JokerNames_menu_name_style_keepers_name"), loc_manager:text("JokerNames_menu_name_style_keepers_type"), i)
-    end
-    loc_manager:add_localized_strings(tbl)
-    table.insert(self.localized_name_styles, "JokerNames_menu_name_style_custom")
-  end
-  
   function JokerNames:set_joker_name(peer_id, unit)
     if not alive(unit) then
       return
     end
     local info = HopLib:unit_info_manager():get_info(unit, nil, true)
-    local new_name = table.random(info:is_female() and self.names.female or self.names.male)
-    local original_name = Keepers.settings.my_joker_name
-    Keepers.joker_names[peer_id] = self:create_name(new_name, Keepers.settings.my_joker_name, info:name())
+    Keepers.joker_names[peer_id] = self:create_name(info)
   end
   
   function JokerNames:check_peer_name_override(peer_id, unit)
@@ -218,8 +198,6 @@ if RequiredScript == "lib/managers/menumanager" then
         end
       end
     end
-
-    JokerNames:create_localized_name_styles(loc)
   end)
 
   local menu_id_main = "JokerNamesMenu"
@@ -227,15 +205,6 @@ if RequiredScript == "lib/managers/menumanager" then
     MenuHelper:NewMenu(menu_id_main)
   end)
   
-  local function check_custom_name_style()
-    for _, item in pairs(MenuHelper:GetMenu(menu_id_main)._items_list) do
-      if item:name() == "custom_name_style" then
-        item:set_enabled(JokerNames.settings.name_style > #JokerNames.name_styles)
-        break
-      end
-    end
-  end
-
   Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenusJokerNames", function(menu_manager, nodes)
     
     JokerNames:load()
@@ -260,41 +229,14 @@ if RequiredScript == "lib/managers/menumanager" then
       JokerNames:load_names()
     end
     
-    MenuCallbackHandler.JokerNames_name_style = function(self, item)
-      MenuCallbackHandler.JokerNames_value(self, item)
-      check_custom_name_style()
-    end
-
-    MenuHelper:AddToggle({
-      id = "use_custom_names",
-      title = "JokerNames_menu_use_custom_names",
-      desc = "JokerNames_menu_use_custom_names_desc",
-      callback = "JokerNames_custom_names",
-      value = JokerNames.settings.use_custom_names,
-      menu_id = menu_id_main,
-      priority = 99
-    })
-    
-    MenuHelper:AddMultipleChoice({
-      id = "name_style",
-      title = "JokerNames_menu_name_style",
-      desc = "JokerNames_menu_name_style_desc",
-      callback = "JokerNames_name_style",
-      value = JokerNames.settings.name_style,
-      items = JokerNames.localized_name_styles,
-      menu_id = menu_id_main,
-      priority = 98
-    })
-    
     MenuHelper:AddInput({
       id = "custom_name_style",
-      title = "JokerNames_menu_custom_name_style",
-      desc = "JokerNames_menu_custom_name_style_desc",
+      title = "JokerNames_menu_name_style",
+      desc = "JokerNames_menu_name_style_desc",
       callback = "JokerNames_value",
       value = JokerNames.settings.custom_name_style,
       menu_id = menu_id_main,
-      disabled = JokerNames.settings.name_style <= #JokerNames.name_styles,
-      priority = 97
+      priority = 99
     })
     
     MenuHelper:AddMultipleChoice({
@@ -307,13 +249,22 @@ if RequiredScript == "lib/managers/menumanager" then
       menu_id = menu_id_main,
       priority = 96
     })
+
+    MenuHelper:AddToggle({
+      id = "use_custom_names",
+      title = "JokerNames_menu_use_custom_names",
+      desc = "JokerNames_menu_use_custom_names_desc",
+      callback = "JokerNames_custom_names",
+      value = JokerNames.settings.use_custom_names,
+      menu_id = menu_id_main,
+      priority = 90
+    })
     
   end)
 
   Hooks:Add("MenuManagerBuildCustomMenus", "MenuManagerBuildCustomMenusPlayerJokerNames", function(menu_manager, nodes)
     nodes[menu_id_main] = MenuHelper:BuildMenu(menu_id_main)
     MenuHelper:AddMenuItem(nodes["blt_options"], menu_id_main, "JokerNames_menu_main_name", "JokerNames_menu_main_desc")
-    check_custom_name_style()
   end)
   
 end
