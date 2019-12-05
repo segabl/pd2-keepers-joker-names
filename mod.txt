@@ -6,8 +6,12 @@
   "color" : "0.043 0.808 0.6",
   "image" : "mod.png",
   "version" : "1.4",
-  "updates" : [ { "identifier" : "joker_names" } ],
-  "dependencies" : [ "KPR", "hoplib" ],
+  "updates" : [
+    {
+      "identifier" : "pd2-keepers-joker-names",
+      "host": { "meta": "http://updates.hoppip.at/pd2-keepers-joker-names" }
+    }
+  ],
   "hooks" : [
     { "hook_id" : "lib/managers/menumanager", "script_path" : "joker_names.lua" },
     { "hook_id" : "lib/network/handlers/unitnetworkhandler", "script_path" : "joker_names.lua" },
