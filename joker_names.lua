@@ -23,14 +23,14 @@ if not JokerNames then
     force_names = 1,
     custom_name_style = "%N"
   }
-  
+
   function JokerNames:create_name(info)
     local name_style = self.settings.custom_name_style
     local name_table = info:is_female() and self.names.female or self.names.male
     local original_name = Keepers.settings.my_joker_name or ""
     return name_style:gsub("%%N", function (a) return table.random(name_table) end):gsub("%%S", function (a) return table.random(self.names.surnames) end):gsub("%%K", original_name):gsub("%%T", info:name())
   end
-  
+
   function JokerNames:save()
     local file = io.open(self.save_path .. "joker_names.txt", "w+")
     if file then
@@ -50,7 +50,7 @@ if not JokerNames then
     end
     self:load_names()
   end
-  
+
   function JokerNames:load_names()
     if self.settings.use_custom_names then
       self.names = parsefile(self.save_path .. "custom_joker_names.txt")
@@ -66,7 +66,7 @@ if not JokerNames then
       }
     end
   end
-  
+
   function JokerNames:check_create_custom_name_file()
     local file = io.open(JokerNames.save_path .. "custom_joker_names.txt", "r")
     local created = false
@@ -82,7 +82,7 @@ if not JokerNames then
     file:close()
     return created
   end
-  
+
   function JokerNames:set_joker_name(peer_id, unit)
     if not alive(unit) then
       return
@@ -90,7 +90,7 @@ if not JokerNames then
     local info = HopLib:unit_info_manager():get_info(unit, nil, true)
     Keepers.joker_names[peer_id] = self:create_name(info)
   end
-  
+
   function JokerNames:check_peer_name_override(peer_id, unit)
     if JokerNames.settings.force_names < 2 then
       return
@@ -102,7 +102,7 @@ if not JokerNames then
       self:set_joker_name(peer_id, unit)
     end
   end
-  
+
   JokerNames:load()
 
 end
@@ -129,30 +129,30 @@ if RequiredScript == "lib/units/interactions/interactionext" then
   -- Handle joker name setting
   local interact_original = IntimitateInteractionExt.interact
   function IntimitateInteractionExt:interact(player, ...)
-  
+
     if self.tweak_data == "hostage_convert" and self:can_interact(player) then
-    
+
       local peer_id = player:network():peer():id()
-      
+
       JokerNames:set_joker_name(peer_id, self._unit)
-      
+
       if Keepers.settings.send_my_joker_name then
         LuaNetworking:SendToPeers("Keepers!", Keepers.joker_names[peer_id])
       end
-      
+
     end
 
     return interact_original(self, player, ...)
   end
-  
+
   -- Handle name overrides (as host)
   local sync_interacted_original = IntimitateInteractionExt.sync_interacted
   function IntimitateInteractionExt:sync_interacted(peer, player, status, ...)
-  
+
     if self.tweak_data == "hostage_convert" then
       JokerNames:check_peer_name_override(peer and peer:id() or managers.network:session():local_peer():id(), self._unit)
     end
-  
+
     return sync_interacted_original(self, peer, player, status, ...)
   end
 
@@ -164,11 +164,11 @@ if RequiredScript == "lib/network/handlers/unitnetworkhandler" then
   -- Handle name overrides (as client)
   local mark_minion_original = UnitNetworkHandler.mark_minion
   function UnitNetworkHandler:mark_minion(unit, minion_owner_peer_id, ...)
-  
+
     if minion_owner_peer_id ~= managers.network:session():local_peer():id() then
       JokerNames:check_peer_name_override(minion_owner_peer_id, unit)
     end
-    
+
     return mark_minion_original(self, unit, minion_owner_peer_id, ...)
   end
 
@@ -178,37 +178,37 @@ end
 if RequiredScript == "lib/managers/menumanager" then
 
   Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitJokerNames", function(loc)
-  
-    loc:load_localization_file(JokerNames.mod_path .. "loc/english.txt")
-    local custom_language
-    for _, mod in pairs(BLT and BLT.Mods:Mods() or {}) do
-      if mod:GetName() == "PAYDAY 2 THAI LANGUAGE Mod" and mod:IsEnabled() then
-        custom_language = "thai"
-        break
-      end
+
+    local language = "english"
+    local system_language = HopLib:get_game_language()
+    local blt_language = BLT.Localization:get_language().language
+    local mod_language = HopLib:get_modded_language()
+
+    local loc_path = JokerNames.mod_path .. "loc/"
+    if io.file_is_readable(loc_path .. system_language .. ".txt") then
+      language = system_language
     end
-    if custom_language then
-      loc:load_localization_file(JokerNames.mod_path .. "loc/" .. custom_language ..".txt")
-    else
-      for _, filename in pairs(file.GetFiles(JokerNames.mod_path .. "loc/") or {}) do
-        local str = filename:match("^(.*).txt$")
-        if str and Idstring(str) and Idstring(str):key() == SystemInfo:language():key() then
-          loc:load_localization_file(JokerNames.mod_path .. "loc/" .. filename)
-          break
-        end
-      end
+    if io.file_is_readable(loc_path .. blt_language .. ".txt") then
+      language = blt_language
     end
+    if mod_language and io.file_is_readable(loc_path .. mod_language .. ".txt") then
+      language = mod_language
+    end
+
+    loc:load_localization_file(loc_path .. language .. ".txt")
+    loc:load_localization_file(loc_path .. "english.txt", false)
+
   end)
 
   local menu_id_main = "JokerNamesMenu"
   Hooks:Add("MenuManagerSetupCustomMenus", "MenuManagerSetupCustomMenusJokerNames", function(menu_manager, nodes)
     MenuHelper:NewMenu(menu_id_main)
   end)
-  
+
   Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenusJokerNames", function(menu_manager, nodes)
-    
+
     JokerNames:load()
-    
+
     MenuCallbackHandler.JokerNames_toggle = function(self, item)
       JokerNames.settings[item:name()] = (item:value() == "on")
       JokerNames:save()
@@ -218,7 +218,7 @@ if RequiredScript == "lib/managers/menumanager" then
       JokerNames.settings[item:name()] = item:value()
       JokerNames:save()
     end
-    
+
     MenuCallbackHandler.JokerNames_custom_names = function(self, item)
       MenuCallbackHandler.JokerNames_toggle(self, item)
       if JokerNames.settings[item:name()] and JokerNames:check_create_custom_name_file() then
@@ -228,7 +228,7 @@ if RequiredScript == "lib/managers/menumanager" then
       end
       JokerNames:load_names()
     end
-    
+
     MenuHelper:AddInput({
       id = "custom_name_style",
       title = "JokerNames_menu_name_style",
@@ -238,7 +238,7 @@ if RequiredScript == "lib/managers/menumanager" then
       menu_id = menu_id_main,
       priority = 99
     })
-    
+
     MenuHelper:AddMultipleChoice({
       id = "force_names",
       title = "JokerNames_menu_force_names",
@@ -259,12 +259,12 @@ if RequiredScript == "lib/managers/menumanager" then
       menu_id = menu_id_main,
       priority = 90
     })
-    
+
   end)
 
   Hooks:Add("MenuManagerBuildCustomMenus", "MenuManagerBuildCustomMenusPlayerJokerNames", function(menu_manager, nodes)
     nodes[menu_id_main] = MenuHelper:BuildMenu(menu_id_main)
     MenuHelper:AddMenuItem(nodes["blt_options"], menu_id_main, "JokerNames_menu_main_name", "JokerNames_menu_main_desc")
   end)
-  
+
 end
