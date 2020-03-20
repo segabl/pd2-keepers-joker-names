@@ -2,6 +2,10 @@ if not HopLib then
   return
 end
 
+if Keepers then
+  Keepers.joker_name_max_length = 255
+end
+
 local function parsefile(fname)
   local file = io.open(fname, "r")
   local data = {}
@@ -28,7 +32,7 @@ if not JokerNames then
     local name_style = self.settings.custom_name_style
     local name_table = info:is_female() and self.names.female or self.names.male
     local original_name = Keepers.settings.my_joker_name or ""
-    return name_style:gsub("%%N", function (a) return table.random(name_table) end):gsub("%%S", function (a) return table.random(self.names.surnames) end):gsub("%%K", original_name):gsub("%%T", info:name())
+    return name_style:gsub("%%N", function () return table.random(name_table) end):gsub("%%S", function () return table.random(self.names.surnames) end):gsub("%%K", original_name):gsub("%%T", info:name())
   end
 
   function JokerNames:save()
@@ -107,22 +111,6 @@ if not JokerNames then
 
 end
 
-if not JokerNames.keepers_hooked then
-  for k, v in pairs(Hooks._registered_hooks["NetworkReceivedData"]) do
-    if v.id == "NetworkReceivedData_KPR" then
-      local orig = v.func
-      v.func = function(sender, message, data)
-        orig(sender, message, data)
-        if message == "Keepers!" and data and Keepers.settings.show_other_jokers_names and data ~= "" then
-          Keepers.joker_names[sender] = data
-        end
-      end
-      JokerNames.keepers_hooked = true
-      log("[JokerNames] Hooked into Keepers' NetworkReceivedData!")
-      break
-    end
-  end
-end
 
 if RequiredScript == "lib/units/interactions/interactionext" then
 
