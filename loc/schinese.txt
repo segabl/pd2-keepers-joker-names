@@ -1,0 +1,15 @@
+{
+  "JokerNames_menu_main_name" : "随机变节警察的名字",
+  "JokerNames_menu_main_desc" : "自定义变节警察的名字",
+  "JokerNames_menu_use_custom_names" : "使用自定义名字",
+  "JokerNames_menu_use_custom_names_desc" : "使用你自定义的名字代替预设的名字",
+  "JokerNames_menu_information" : "提示",
+  "JokerNames_menu_information_text" : "一个写有自定义名字格式例子的名为 \"custom_joker_names.txt\" 的文件已被创建在 \"PAYDAY 2/mods/saves\"。\n编辑这个文件以添加自定义名字。",
+  "JokerNames_menu_name_style" : "名字的格式",
+  "JokerNames_menu_name_style_desc" : "变节警察的名字如何构成？\n写上%N表示\"名\" , %S = \"姓\", %K = \"Keepers使用的名字\", %T = \"兵种\"",
+  "JokerNames_menu_force_names" : "为他人命名",
+  "JokerNames_menu_force_names_desc" : "根据你的设置为其它玩家的变节警察命名",
+  "JokerNames_menu_force_names_never" : "从不",
+  "JokerNames_menu_force_names_empty" : "如果其未被命名",
+  "JokerNames_menu_force_names_always" : "总是"
+}
