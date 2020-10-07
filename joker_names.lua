@@ -75,12 +75,12 @@ if not JokerNames then
     local file = io.open(JokerNames.save_path .. "custom_joker_names.txt", "r")
     local created = false
     if not file then
+      local example_names = {}
+      for k, v in pairs(JokerNames.names) do
+        example_names[k] = { table.random(v), table.random(v) }
+      end
       file = io.open(JokerNames.save_path .. "custom_joker_names.txt", "w+")
-      file:write(json.encode({
-        male = { table.random(JokerNames.names.male), table.random(JokerNames.names.male) },
-        female = { table.random(JokerNames.names.female), table.random(JokerNames.names.female) },
-        surnames = { table.random(JokerNames.names.surnames), table.random(JokerNames.names.surnames) }
-      }))
+      file:write(json.encode(example_names))
       created = true
     end
     file:close()
