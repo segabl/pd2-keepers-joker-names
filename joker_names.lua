@@ -1,10 +1,8 @@
-if not HopLib then
+if not HopLib or not Keepers then
   return
 end
 
-if Keepers then
-  Keepers.joker_name_max_length = 255
-end
+Keepers.joker_name_max_length = 255
 
 local function parsefile(fname)
   local file = io.open(fname, "r")
