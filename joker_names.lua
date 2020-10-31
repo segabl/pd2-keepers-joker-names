@@ -6,7 +6,7 @@ Keepers.joker_name_max_length = 255
 
 local function parsefile(fname)
   local file = io.open(fname, "r")
-  local data = {}
+  local data
   if file then
     data = json.decode(file:read("*all"))
     file:close()
@@ -56,7 +56,7 @@ if not JokerNames then
   function JokerNames:load_names()
     if self.settings.use_custom_names then
       self.names = parsefile(self.save_path .. "custom_joker_names.txt")
-      if not self.names.male or not self.names.female or not self.names.surnames or #self.names.male == 0 or #self.names.female == 0 or #self.names.surnames == 0 then
+      if not self.names or not self.names.male or not self.names.female or not self.names.surnames or #self.names.male == 0 or #self.names.female == 0 or #self.names.surnames == 0 then
         self.names = nil
       end
     end
