@@ -54,18 +54,15 @@ if not JokerNames then
   end
 
   function JokerNames:load_names()
+    self.names = {
+      male = parsefile(self.mod_path .. "data/names_m.json"),
+      female = parsefile(self.mod_path .. "data/names_f.json"),
+      surnames = parsefile(self.mod_path .. "data/surnames.json")
+    }
     if self.settings.use_custom_names then
-      self.names = parsefile(self.save_path .. "custom_joker_names.txt")
-      if not self.names or not self.names.male or not self.names.female or not self.names.surnames or #self.names.male == 0 or #self.names.female == 0 or #self.names.surnames == 0 then
-        self.names = nil
+      for k, v in pairs(parsefile(self.save_path .. "custom_joker_names.txt") or {}) do
+        self.names[k] = v
       end
-    end
-    if not self.settings.use_custom_names or not self.names then
-      self.names = {
-        male = parsefile(self.mod_path .. "data/names_m.json"),
-        female = parsefile(self.mod_path .. "data/names_f.json"),
-        surnames = parsefile(self.mod_path .. "data/surnames.json")
-      }
     end
   end
 
