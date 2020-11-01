@@ -1,2 +1,2 @@
 # pd2-keepers-joker-names
-Addon for [Keepers](http://paydaymods.com/mods/102/KPR) to enable random names for Jokers
+Addon for [Keepers](https://pd2mods.z77.fr/keepers.html) to enable random names for Jokers
