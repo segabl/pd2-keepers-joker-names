@@ -42,13 +42,8 @@ if not JokerNames then
   end
 
   function JokerNames:load()
-    local file = io.open(self.save_path .. "joker_names.txt", "r")
-    if file then
-      local data = json.decode(file:read("*all")) or {}
-      file:close()
-      for k, v in pairs(data) do
-        self.settings[k] = v
-      end
+    for k, v in pairs(parsefile(self.save_path .. "joker_names.txt") or {}) do
+      self.settings[k] = v
     end
     self:load_names()
   end
@@ -172,8 +167,6 @@ if RequiredScript == "lib/managers/menumanager" then
   end)
 
   Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenusJokerNames", function(menu_manager, nodes)
-
-    JokerNames:load()
 
     MenuCallbackHandler.JokerNames_toggle = function(self, item)
       JokerNames.settings[item:name()] = (item:value() == "on")
