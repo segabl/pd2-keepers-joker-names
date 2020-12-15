@@ -1,15 +1,15 @@
 {
-  "JokerNames_menu_main_name" : "Keepers Joker Names",
-  "JokerNames_menu_main_desc" : "Personalizza le impostazioni dei nomi per i joker",
-  "JokerNames_menu_use_custom_names" : "Usa nomi personalizzati",
-  "JokerNames_menu_use_custom_names_desc" : "Usa i tuoi nomi personalizzati invece di quelli predefiniti",
-  "JokerNames_menu_information" : "Informazione",
-  "JokerNames_menu_information_text" : "Un file chiamato \"custom_joker_names.txt\" con inserimenti d'esempio è stato creato in \"PAYDAY 2/mods/saves\".\nModificalo per aggiungere nomi personalizzati.",
-  "JokerNames_menu_name_style" : "Format nome",
-  "JokerNames_menu_name_style_desc" : "Format del nome dei joker\n%N = Nome, %S = Cognome, %K = nome di Keepers, %T = Tipo di unità",
-  "JokerNames_menu_force_names" : "Sovrascrivi nomi",
-  "JokerNames_menu_force_names_desc" : "Sovrascrivi i nomi dei joker degli altri giocatori in base alle impostazioni",
-  "JokerNames_menu_force_names_never" : "Mai",
-  "JokerNames_menu_force_names_empty" : "Se non è definito",
-  "JokerNames_menu_force_names_always" : "Sempre"
+	"JokerNames_menu_main_name" : "Keepers Joker Names",
+	"JokerNames_menu_main_desc" : "Personalizza le impostazioni dei nomi per i joker",
+	"JokerNames_menu_use_custom_names" : "Usa nomi personalizzati",
+	"JokerNames_menu_use_custom_names_desc" : "Usa i tuoi nomi personalizzati invece di quelli predefiniti",
+	"JokerNames_menu_information" : "Informazione",
+	"JokerNames_menu_information_text" : "Un file chiamato \"custom_joker_names.txt\" con inserimenti d'esempio è stato creato in \"PAYDAY 2/mods/saves\".\nModificalo per aggiungere nomi personalizzati.",
+	"JokerNames_menu_name_style" : "Format nome",
+	"JokerNames_menu_name_style_desc" : "Format del nome dei joker\n%N = Nome, %S = Cognome, %K = nome di Keepers, %T = Tipo di unità",
+	"JokerNames_menu_force_names" : "Sovrascrivi nomi",
+	"JokerNames_menu_force_names_desc" : "Sovrascrivi i nomi dei joker degli altri giocatori in base alle impostazioni",
+	"JokerNames_menu_force_names_never" : "Mai",
+	"JokerNames_menu_force_names_empty" : "Se non è definito",
+	"JokerNames_menu_force_names_always" : "Sempre"
 }
