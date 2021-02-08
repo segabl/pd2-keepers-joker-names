@@ -7,6 +7,7 @@
 	"color" : "0.043 0.808 0.6",
 	"image" : "mod.png",
 	"version" : "1.5",
+	"priority" : -1,
 	"updates" : [{
 		"identifier" : "pd2-keepers-joker-names",
 		"host": { "meta": "http://updates.hoppip.at/pd2-keepers-joker-names" }
