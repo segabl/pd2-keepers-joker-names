@@ -1,5 +1,16 @@
-if not HopLib or not Keepers then
+if not HopLib then
 	return
+end
+
+if not Keepers then
+	Keepers = {
+		impostor = true,
+		settings = {},
+		joker_names = {},
+		get_joker_name_by_peer = function (self, peer_id)
+			return self.joker_names[peer_id]
+		end
+	}
 end
 
 Keepers.joker_name_max_length = 255
@@ -81,8 +92,12 @@ if not JokerNames then
 		if not alive(unit) then
 			return
 		end
-		local info = HopLib:unit_info_manager():get_info(unit, nil, true)
-		Keepers.joker_names[peer_id] = self:create_name(info)
+
+		if Keepers.impostor then
+			unit:base().kpr_minion_owner_peer_id = peer_id
+		end
+
+		Keepers.joker_names[peer_id] = self:create_name(HopLib:unit_info_manager():get_info(unit, nil, true))
 	end
 
 	function JokerNames:check_peer_name_override(peer_id, unit)
