@@ -1,0 +1,15 @@
+{
+	"JokerNames_menu_main_name" : "Keepers Joker Names",
+	"JokerNames_menu_main_desc" : "Изменить настройки имён Джокеров",
+	"JokerNames_menu_use_custom_names" : "Использовать кастомные иена",
+	"JokerNames_menu_use_custom_names_desc" : "Используйте свои собственные имена заместо стандартных",
+	"JokerNames_menu_information" : "Информация",
+	"JokerNames_menu_information_text" : "Файл \"custom_joker_names.txt\" с примерами был создан в \"PAYDAY 2/mods/saves\".\nОтредактируйте его чтоб добавить имена.",
+	"JokerNames_menu_name_style" : "Формат Имени",
+	"JokerNames_menu_name_style_desc" : "Формат Имени Джокеров\n%N = Имя, %S = Фамилия, %K = Имя Хозяина, %T = Тип Юнита",
+	"JokerNames_menu_force_names" : "Перезаписать имена",
+	"JokerNames_menu_force_names_desc" : "Перезаписывать имена чужих Джокеров в зависимости от настроек",
+	"JokerNames_menu_force_names_never" : "Никогда",
+	"JokerNames_menu_force_names_empty" : "Если не настроено",
+	"JokerNames_menu_force_names_always" : "Всегда"
+}
