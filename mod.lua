@@ -7,6 +7,7 @@ if not Keepers then
 		impostor = true,
 		settings = {},
 		joker_names = {},
+		get_covered_interactable_units = function () return {} end,
 		get_joker_name_by_peer = function (self, peer_id) return self.joker_names[peer_id] end,
 		get_special_objective = function () end,
 		is_unit_interactable = function () end
