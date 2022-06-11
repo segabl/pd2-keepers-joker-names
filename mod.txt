@@ -2,14 +2,13 @@
 	"name" : "Keepers Joker Names",
 	"description" : "Gives every Joker a random name",
 	"author" : "Hoppip",
-	"contact" : "Hoppip#1630",
 	"color" : "0.043 0.808 0.6",
 	"image" : "mod.png",
 	"version" : "1.5",
 	"priority" : -1,
 	"updates" : [{
 		"identifier" : "pd2-keepers-joker-names",
-		"host": { "meta": "http://updates.hoppip.at/pd2-keepers-joker-names" }
+		"host": { "meta": "https://updates.hoppip.at/pd2-keepers-joker-names" }
 	}],
 	"hooks" : [
 		{ "hook_id" : "lib/managers/menumanager", "script_path" : "mod.lua" },
