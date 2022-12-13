@@ -3,6 +3,8 @@
 	"JokerNames_menu_main_desc" : "Customize Joker Names settings",
 	"JokerNames_menu_use_custom_names" : "Use custom names",
 	"JokerNames_menu_use_custom_names_desc" : "Use your own custom names instead of the provided ones",
+	"JokerNames_menu_add_labels" : "Add name labels",
+	"JokerNames_menu_add_labels_desc" : "Adds name labels to Jokers",
 	"JokerNames_menu_information" : "Information",
 	"JokerNames_menu_information_text" : "A file named \"custom_joker_names.txt\" with example entries has been created in \"PAYDAY 2/mods/saves\".\nEdit it to add custom names.",
 	"JokerNames_menu_name_style" : "Name format",

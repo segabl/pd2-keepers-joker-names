@@ -3,6 +3,8 @@
 	"JokerNames_menu_main_desc" : "自定义变节警察的名字",
 	"JokerNames_menu_use_custom_names" : "使用自定义名字",
 	"JokerNames_menu_use_custom_names_desc" : "使用你自定义的名字代替预设的名字",
+	"JokerNames_menu_add_labels" : "Add name labels",
+	"JokerNames_menu_add_labels_desc" : "Adds name labels to Jokers",
 	"JokerNames_menu_information" : "提示",
 	"JokerNames_menu_information_text" : "一个写有自定义名字格式例子的名为 \"custom_joker_names.txt\" 的文件已被创建在 \"PAYDAY 2/mods/saves\"。\n编辑这个文件以添加自定义名字。",
 	"JokerNames_menu_name_style" : "名字的格式",

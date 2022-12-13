@@ -3,6 +3,8 @@
 	"JokerNames_menu_main_desc" : "Anpassa inställningar för Jokernamn",
 	"JokerNames_menu_use_custom_names" : "Använd anpassade inställningar",
 	"JokerNames_menu_use_custom_names_desc" : "Använd anpassade namn istället för de som anges",
+	"JokerNames_menu_add_labels" : "Add name labels",
+	"JokerNames_menu_add_labels_desc" : "Adds name labels to Jokers",
 	"JokerNames_menu_information" : "Information",
 	"JokerNames_menu_information_text" : "En fil som kallas \"custom_joker_names.txt\" med inlagda exempel har skapats i \"PAYDAY 2/mods/saves\".\nRedigera den för att lägga till anpassade namn.",
 	"JokerNames_menu_name_style" : "Namnformat",

@@ -3,6 +3,8 @@
 	"JokerNames_menu_main_desc" : "Изменить настройки имён Джокеров",
 	"JokerNames_menu_use_custom_names" : "Использовать кастомные иена",
 	"JokerNames_menu_use_custom_names_desc" : "Используйте свои собственные имена заместо стандартных",
+	"JokerNames_menu_add_labels" : "Add name labels",
+	"JokerNames_menu_add_labels_desc" : "Adds name labels to Jokers",
 	"JokerNames_menu_information" : "Информация",
 	"JokerNames_menu_information_text" : "Файл \"custom_joker_names.txt\" с примерами был создан в \"PAYDAY 2/mods/saves\".\nОтредактируйте его чтоб добавить имена.",
 	"JokerNames_menu_name_style" : "Формат Имени",
