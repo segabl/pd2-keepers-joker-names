@@ -89,7 +89,7 @@ if not JokerNames then
 	JokerNames:load()
 
 	Hooks:Add("HopLibOnMinionAdded", "HopLibOnMinionAddedJokerNames", function (unit, player_unit)
-		if Keepers or not JokerNames.settings.add_labels or not unit:base().joker_name then
+		if not unit:base().joker_name or unit:unit_data().name_label_id or not JokerNames.settings.add_labels then
 			return
 		end
 
@@ -102,6 +102,7 @@ if not JokerNames then
 	Hooks:Add("HopLibOnMinionRemoved", "HopLibOnMinionRemovedJokerNames", function (unit)
 		if unit:unit_data().name_label_id then
 			managers.hud:_remove_name_label(unit:unit_data().name_label_id)
+			unit:unit_data().name_label_id = nil
 		end
 	end)
 
