@@ -42,7 +42,10 @@ if not JokerNames then
 			surnames = parsefile(self.mod_path .. "data/surnames.json")
 		}
 		if self.settings.use_custom_names then
-			table.replace(self.names, parsefile(self.save_path .. "custom_joker_names.txt"))
+			local names = parsefile(self.save_path .. "custom_joker_names.txt")
+			self.names.male = names.male and #names.male > 0 and names.male or self.names.male
+			self.names.female = names.female and #names.female > 0 and names.female or self.names.female
+			self.names.surnames = names.surnames and #names.surnames > 0 and names.surnames or self.names.surnames
 		end
 	end
 
