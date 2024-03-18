@@ -67,8 +67,10 @@ if not JokerNames then
 			return
 		end
 
-		local name = self:create_name(HopLib:unit_info_manager():get_info(unit, nil, true))
+		local info = HopLib:unit_info_manager():get_info(unit, nil, true)
+		local name = self:create_name(info)
 		unit:base().joker_name = name
+		info._nickname = name
 		if Keepers then
 			Keepers.joker_names[peer_id] = name
 		end
@@ -78,7 +80,7 @@ if not JokerNames then
 		if JokerNames.settings.force_names < 2 then
 			return
 		end
-		if JokerNames.original_name_empty[peer_id] == nil then
+		if peer_id and JokerNames.original_name_empty[peer_id] == nil then
 			JokerNames.original_name_empty[peer_id] = not Keepers or Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
 		end
 		if JokerNames.original_name_empty[peer_id] or self.settings.force_names == 3 then
@@ -205,12 +207,12 @@ if RequiredScript == "lib/units/interactions/interactionext" then
 		end
 	end)
 
-elseif RequiredScript == "lib/network/handlers/unitnetworkhandler" then
+elseif RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
 
 	-- Handle name overrides (as client)
-	Hooks:PreHook(UnitNetworkHandler, "mark_minion", "mark_minion_joker_names", function (self, unit, minion_owner_peer_id)
-		if minion_owner_peer_id ~= managers.network:session():local_peer():id() then
-			JokerNames:check_peer_name_override(minion_owner_peer_id, unit)
+	Hooks:PreHook(GroupAIStateBase, "sync_converted_enemy", "sync_converted_enemy_joker_names", function (self, converted_enemy, owner_peer_id)
+		if owner_peer_id ~= managers.network:session():local_peer():id() then
+			JokerNames:check_peer_name_override(owner_peer_id, converted_enemy)
 		end
 	end)
 
