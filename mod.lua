@@ -16,7 +16,8 @@ if not JokerNames then
 		add_labels = true,
 		custom_name_style = "%N",
 		force_names = 1,
-		use_custom_names = false
+		use_custom_names = false,
+		peer_colors = false
 	}
 
 	function JokerNames:create_name(info)
@@ -95,8 +96,17 @@ if not JokerNames then
 			return
 		end
 
+		local color_id = JokerNames.settings.peer_colors and managers.criminals:character_color_id_by_unit(player_unit)
+
 		unit:unit_data().name_label_id = managers.hud:_add_name_label({
 			name = unit:base().joker_name,
+			name_color_ranges = {
+				{
+					start = 0,
+					stop = utf8.len(unit:base().joker_name),
+					color = tweak_data.chat_colors[color_id] or tweak_data.chat_colors[#tweak_data.chat_colors]
+				}
+			},
 			unit = unit
 		})
 	end)
@@ -146,6 +156,16 @@ if not JokerNames then
 				desc = "JokerNames_menu_add_labels_desc",
 				callback = "JokerNames_toggle",
 				value = JokerNames.settings.add_labels,
+				menu_id = menu_id_main,
+				priority = 101
+			})
+
+			MenuHelper:AddToggle({
+				id = "peer_colors",
+				title = "JokerNames_menu_peer_colors",
+				desc = "JokerNames_menu_peer_colors_desc",
+				callback = "JokerNames_toggle",
+				value = JokerNames.settings.peer_colors,
 				menu_id = menu_id_main,
 				priority = 100
 			})
