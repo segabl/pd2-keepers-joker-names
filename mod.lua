@@ -12,6 +12,7 @@ if not JokerNames then
 	JokerNames.mod_path = ModPath
 	JokerNames.save_path = SavePath
 	JokerNames.original_name_empty = {}
+	JokerNames.peer_names = {}
 	JokerNames.settings = {
 		add_labels = true,
 		custom_name_style = "%N",
@@ -72,19 +73,31 @@ if not JokerNames then
 		local name = self:create_name(info)
 		unit:base().joker_name = name
 		info._nickname = name
-		if Keepers then
-			Keepers.joker_names[peer_id] = name
+
+		local joker_names = Keepers and Keepers.joker_names or JokerNames.peer_names
+		joker_names[peer_id] = name
+	end
+
+	function JokerNames:get_peer_joker_name(peer_id)
+		local joker_names = Keepers and Keepers.joker_names or JokerNames.peer_names
+		if peer_id and self.original_name_empty[peer_id] == nil then
+			self.original_name_empty[peer_id] = not joker_names[peer_id] or joker_names[peer_id] == "My Joker" or joker_names[peer_id] == "" or false
+		end
+
+		if not self.original_name_empty[peer_id] then
+			return joker_names[peer_id]
 		end
 	end
 
 	function JokerNames:check_peer_name_override(peer_id, unit)
-		if JokerNames.settings.force_names < 2 then
-			return
-		end
-		if peer_id and JokerNames.original_name_empty[peer_id] == nil then
-			JokerNames.original_name_empty[peer_id] = not Keepers or Keepers.joker_names[peer_id] == "My Joker" or Keepers.joker_names[peer_id] == ""
-		end
-		if JokerNames.original_name_empty[peer_id] or self.settings.force_names == 3 then
+		if JokerNames.settings.force_names <= 2 then
+			local joker_name = self:get_peer_joker_name(peer_id)
+			if joker_name then
+				unit:base().joker_name = joker_name
+			elseif JokerNames.settings.force_names == 2 then
+				self:set_joker_name(peer_id, unit)
+			end
+		else
 			self:set_joker_name(peer_id, unit)
 		end
 	end
@@ -92,7 +105,7 @@ if not JokerNames then
 	JokerNames:load()
 
 	Hooks:Add("HopLibOnMinionAdded", "HopLibOnMinionAddedJokerNames", function (unit, player_unit)
-		if not unit:base().joker_name or unit:unit_data().name_label_id or not JokerNames.settings.add_labels then
+		if not alive(unit) or not unit:base().joker_name or unit:unit_data().name_label_id or not JokerNames.settings.add_labels or Keepers then
 			return
 		end
 
@@ -112,9 +125,15 @@ if not JokerNames then
 	end)
 
 	Hooks:Add("HopLibOnMinionRemoved", "HopLibOnMinionRemovedJokerNames", function (unit)
-		if unit:unit_data().name_label_id then
+		if alive(unit) and unit:unit_data().name_label_id then
 			managers.hud:_remove_name_label(unit:unit_data().name_label_id)
 			unit:unit_data().name_label_id = nil
+		end
+	end)
+
+	Hooks:Add("NetworkReceivedData", "NetworkReceivedDataJokerNames", function (sender, id, data)
+		if id == "Keepers!" then
+			JokerNames.peer_names[sender] = data
 		end
 	end)
 
@@ -149,27 +168,27 @@ if not JokerNames then
 			JokerNames:save()
 		end
 
-		if not Keepers then
-			MenuHelper:AddToggle({
-				id = "add_labels",
-				title = "JokerNames_menu_add_labels",
-				desc = "JokerNames_menu_add_labels_desc",
-				callback = "JokerNames_toggle",
-				value = JokerNames.settings.add_labels,
-				menu_id = menu_id_main,
-				priority = 101
-			})
+		MenuHelper:AddToggle({
+			id = "add_labels",
+			title = "JokerNames_menu_add_labels",
+			desc = "JokerNames_menu_add_labels_desc",
+			callback = "JokerNames_toggle",
+			value = Keepers and true or JokerNames.settings.add_labels,
+			disabled = Keepers,
+			menu_id = menu_id_main,
+			priority = 101
+		})
 
-			MenuHelper:AddToggle({
-				id = "peer_colors",
-				title = "JokerNames_menu_peer_colors",
-				desc = "JokerNames_menu_peer_colors_desc",
-				callback = "JokerNames_toggle",
-				value = JokerNames.settings.peer_colors,
-				menu_id = menu_id_main,
-				priority = 100
-			})
-		end
+		MenuHelper:AddToggle({
+			id = "peer_colors",
+			title = "JokerNames_menu_peer_colors",
+			desc = "JokerNames_menu_peer_colors_desc",
+			callback = "JokerNames_toggle",
+			value = Keepers and true or JokerNames.settings.peer_colors,
+			disabled = Keepers,
+			menu_id = menu_id_main,
+			priority = 100
+		})
 
 		MenuHelper:AddInput({
 			id = "custom_name_style",
