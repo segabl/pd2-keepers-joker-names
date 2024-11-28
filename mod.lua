@@ -227,7 +227,21 @@ if not JokerNames then
 
 end
 
-if RequiredScript == "lib/units/interactions/interactionext" then
+if RequiredScript == "lib/units/enemies/cop/copdamage" then
+
+	Hooks:PostHook(CopDamage, "save", "save_joker_names", function (self, data)
+		if data.char_dmg and data.char_dmg.is_converted and (not Keepers or Keepers.settings.send_my_joker_name) then
+			data.char_dmg.minion_name = self._unit:base().joker_name
+		end
+	end)
+
+	Hooks:PreHook(CopDamage, "load", "load_joker_names", function (self, data)
+		if data.char_dmg and data.char_dmg.is_converted and data.char_dmg.minion_name then
+			self._unit:base().joker_name = data.char_dmg.minion_name
+		end
+	end)
+
+elseif RequiredScript == "lib/units/interactions/interactionext" then
 
 	-- Handle joker name setting
 	Hooks:PreHook(IntimitateInteractionExt, "interact", "interact_joker_names", function (self, player)
